@@ -188,6 +188,137 @@
       display: flex;
     }
 
+    /* Page flip animation */
+    .flip-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      pointer-events: none;
+      perspective: 2000px;
+    }
+
+    .flip-book {
+      position: relative;
+      width: 900px;
+      max-width: 95vw;
+      display: flex;
+      transform-style: preserve-3d;
+    }
+
+    .flip-page-container {
+      position: absolute;
+      width: 50%;
+      height: 100%;
+      right: 0;
+      transform-style: preserve-3d;
+      transform-origin: left center;
+      transition: transform 0.6s ease-in-out;
+    }
+
+    .flip-page-container.flipping-forward {
+      animation: flipForward 0.6s ease-in-out forwards;
+    }
+
+    .flip-page-container.flipping-backward {
+      animation: flipBackward 0.6s ease-in-out forwards;
+    }
+
+    @keyframes flipForward {
+      0% {
+        transform: rotateY(0deg);
+      }
+      100% {
+        transform: rotateY(-180deg);
+      }
+    }
+
+    @keyframes flipBackward {
+      0% {
+        transform: rotateY(-180deg);
+      }
+      100% {
+        transform: rotateY(0deg);
+      }
+    }
+
+    .flip-page {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      background: #f5f5f0;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    .flip-page img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .flip-page.front {
+      border-radius: 0 8px 8px 0;
+    }
+
+    .flip-page.back {
+      transform: rotateY(180deg);
+      border-radius: 8px 0 0 8px;
+    }
+
+    .flip-page.blank {
+      background: linear-gradient(135deg, #f9f9f4 0%, #f0f0e8 100%);
+    }
+
+    /* Static pages during flip */
+    .flip-static-left,
+    .flip-static-right {
+      width: 50%;
+      background: #f5f5f0;
+      position: relative;
+    }
+
+    .flip-static-left {
+      border-radius: 8px 0 0 8px;
+      box-shadow: -5px 5px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .flip-static-right {
+      border-radius: 0 8px 8px 0;
+      box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .flip-static-left img,
+    .flip-static-right img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .flip-static-left img {
+      border-radius: 8px 0 0 8px;
+    }
+
+    .flip-static-right img {
+      border-radius: 0 8px 8px 0;
+    }
+
+    .flip-static-left.blank,
+    .flip-static-right.blank {
+      background: linear-gradient(135deg, #f9f9f4 0%, #f0f0e8 100%);
+    }
+
+    /* Hide main content during animation */
+    .book.animating .view {
+      visibility: hidden;
+    }
+
     /* Navigation buttons */
     .nav-buttons {
       display: flex;
@@ -453,9 +584,143 @@
   <script>
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
+    const book = document.querySelector('.book');
     const views = document.querySelectorAll('.view');
     const totalViews = views.length;
     let currentView = 0;
+    let isAnimating = false;
+
+    // Page data for building flip animation
+    // Format: [leftPage, rightPage] - null for blank, 'cover' for covers
+    const pageData = [
+      ['cover', '1.jpeg'],           // View 0: Cover
+      ['blank', '2.jpeg'],           // View 1: Blank + 2
+      ['3.jpeg', '4.jpeg'],          // View 2
+      ['5.jpeg', '6.jpeg'],          // View 3
+      ['7.jpeg', '8.jpeg'],          // View 4
+      ['9.jpeg', '10.jpeg'],         // View 5
+      ['11.jpeg', '12.jpeg'],        // View 6
+      ['13.jpeg', '14.jpeg'],        // View 7
+      ['15.jpeg', '16.jpeg'],        // View 8
+      ['17.jpeg', '18.jpeg'],        // View 9
+      ['19.jpeg', '20.jpeg'],        // View 10
+      ['21.jpeg', '22.jpeg'],        // View 11
+      ['23.jpeg', '24.jpeg'],        // View 12
+      ['25.jpeg', '26.jpeg'],        // View 13
+      ['27.jpeg', '28.jpeg'],        // View 14
+      ['29.jpeg', '30.jpeg'],        // View 15
+      ['31.jpeg', '32.jpeg'],        // View 16
+      ['back-cover', '33.jpeg'],     // View 17: Back Cover
+    ];
+
+    function createPageElement(src, isBlank) {
+      if (isBlank || src === 'blank') {
+        return '<div class="blank"></div>';
+      }
+      return `<img src="${src}" alt="Page">`;
+    }
+
+    function getFlipHeight() {
+      const activeView = document.querySelector('.view.active');
+      const content = activeView.querySelector('.spread, .cover, .back-cover');
+      return content ? content.offsetHeight : 600;
+    }
+
+    function animateFlip(fromIndex, toIndex, direction) {
+      isAnimating = true;
+      book.classList.add('animating');
+
+      const flipContainer = document.createElement('div');
+      flipContainer.className = 'flip-container';
+
+      const height = getFlipHeight();
+      const fromData = pageData[fromIndex];
+      const toData = pageData[toIndex];
+
+      // Determine what's shown during flip
+      let staticLeft, staticRight, flipFront, flipBack;
+
+      if (direction === 'forward') {
+        // Going forward: right page flips to reveal next spread
+        // Static left: current left page (stays visible)
+        // Flip front: current right page
+        // Flip back: next left page
+        // Static right: next right page (revealed after flip)
+        
+        if (fromData[0] === 'cover') {
+          // Flipping from cover
+          staticLeft = { blank: true };
+          flipFront = { src: '1.jpeg' };
+          flipBack = { blank: true };
+          staticRight = { src: toData[1] };
+        } else if (toData[0] === 'back-cover') {
+          // Flipping to back cover
+          staticLeft = { src: fromData[0], blank: fromData[0] === 'blank' };
+          flipFront = { src: fromData[1] };
+          flipBack = { src: '33.jpeg' };
+          staticRight = { blank: true };
+        } else {
+          staticLeft = { src: fromData[0], blank: fromData[0] === 'blank' };
+          flipFront = { src: fromData[1] };
+          flipBack = { src: toData[0], blank: toData[0] === 'blank' };
+          staticRight = { src: toData[1] };
+        }
+      } else {
+        // Going backward: left page flips back
+        // Static left: previous left page (revealed after flip)
+        // Flip front: previous right page (shown after flip completes)
+        // Flip back: current left page (visible at start)
+        // Static right: current right page (stays visible)
+        
+        if (toData[0] === 'cover') {
+          // Flipping back to cover
+          staticLeft = { blank: true };
+          flipFront = { src: '1.jpeg' };
+          flipBack = { blank: true };
+          staticRight = { src: fromData[1], blank: fromData[1] === 'blank' };
+        } else if (fromData[0] === 'back-cover') {
+          // Flipping back from back cover
+          staticLeft = { src: toData[0], blank: toData[0] === 'blank' };
+          flipFront = { src: toData[1] };
+          flipBack = { src: '33.jpeg' };
+          staticRight = { blank: true };
+        } else {
+          staticLeft = { src: toData[0], blank: toData[0] === 'blank' };
+          flipFront = { src: toData[1] };
+          flipBack = { src: fromData[0], blank: fromData[0] === 'blank' };
+          staticRight = { src: fromData[1], blank: fromData[1] === 'blank' };
+        }
+      }
+
+      flipContainer.innerHTML = `
+        <div class="flip-book" style="height: ${height}px;">
+          <div class="flip-static-left ${staticLeft.blank ? 'blank' : ''}">
+            ${staticLeft.blank ? '' : `<img src="${staticLeft.src}" alt="Page">`}
+          </div>
+          <div class="flip-static-right ${staticRight.blank ? 'blank' : ''}">
+            ${staticRight.blank ? '' : `<img src="${staticRight.src}" alt="Page">`}
+          </div>
+          <div class="flip-page-container ${direction === 'forward' ? 'flipping-forward' : 'flipping-backward'}" style="height: ${height}px;">
+            <div class="flip-page front ${flipFront.blank ? 'blank' : ''}">
+              ${flipFront.blank ? '' : `<img src="${flipFront.src}" alt="Page">`}
+            </div>
+            <div class="flip-page back ${flipBack.blank ? 'blank' : ''}">
+              ${flipBack.blank ? '' : `<img src="${flipBack.src}" alt="Page">`}
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(flipContainer);
+
+      // After animation completes
+      setTimeout(() => {
+        flipContainer.remove();
+        book.classList.remove('animating');
+        isAnimating = false;
+        showView(toIndex);
+      }, 650);
+    }
 
     function showView(index) {
       views.forEach((view, i) => {
@@ -466,28 +731,48 @@
     }
 
     function updateButtons() {
-      prevBtn.disabled = currentView === 0;
-      nextBtn.disabled = currentView === totalViews - 1;
+      prevBtn.disabled = currentView === 0 || isAnimating;
+      nextBtn.disabled = currentView === totalViews - 1 || isAnimating;
     }
 
     nextBtn.addEventListener('click', () => {
-      if (currentView < totalViews - 1) {
-        showView(currentView + 1);
+      if (currentView < totalViews - 1 && !isAnimating) {
+        animateFlip(currentView, currentView + 1, 'forward');
       }
     });
 
     prevBtn.addEventListener('click', () => {
-      if (currentView > 0) {
-        showView(currentView - 1);
+      if (currentView > 0 && !isAnimating) {
+        animateFlip(currentView, currentView - 1, 'backward');
       }
     });
 
     // Keyboard navigation
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowRight') {
+      if (e.key === 'ArrowRight' && !isAnimating) {
         nextBtn.click();
-      } else if (e.key === 'ArrowLeft') {
+      } else if (e.key === 'ArrowLeft' && !isAnimating) {
         prevBtn.click();
+      }
+    });
+
+    // Touch/swipe support
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+
+    document.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const diff = touchStartX - touchEndX;
+      if (Math.abs(diff) > 50) {
+        if (diff > 0) {
+          nextBtn.click(); // Swipe left = next
+        } else {
+          prevBtn.click(); // Swipe right = prev
+        }
       }
     });
 
