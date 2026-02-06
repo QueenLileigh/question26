@@ -141,6 +141,39 @@
       background: linear-gradient(135deg, #f9f9f4 0%, #f0f0e8 100%);
     }
 
+    /* Back cover */
+    .back-cover {
+      position: relative;
+      max-width: 450px;
+      margin: 0 auto;
+      box-shadow: 
+        0 0 20px rgba(0, 0, 0, 0.5),
+        -5px 5px 30px rgba(0, 0, 0, 0.4),
+        inset 3px 0 10px rgba(0, 0, 0, 0.2);
+      border-radius: 8px 0 0 8px;
+      overflow: hidden;
+    }
+
+    .back-cover img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    /* Book spine effect on right edge for back cover */
+    .back-cover::before {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 15px;
+      background: linear-gradient(to left, 
+        rgba(0, 0, 0, 0.4) 0%,
+        rgba(0, 0, 0, 0.1) 50%,
+        transparent 100%);
+    }
+
     /* View management */
     .view {
       display: none;
@@ -212,6 +245,191 @@
           <div class="page page-right">
             <img src="2.jpeg" alt="Page 2">
           </div>
+        </div>
+      </div>
+
+      <!-- View 2: Pages 3-4 -->
+      <div class="view" data-view="2">
+        <div class="spread">
+          <div class="page page-left">
+            <img src="3.jpeg" alt="Page 3">
+          </div>
+          <div class="page page-right">
+            <img src="4.jpeg" alt="Page 4">
+          </div>
+        </div>
+      </div>
+
+      <!-- View 3: Pages 5-6 -->
+      <div class="view" data-view="3">
+        <div class="spread">
+          <div class="page page-left">
+            <img src="5.jpeg" alt="Page 5">
+          </div>
+          <div class="page page-right">
+            <img src="6.jpeg" alt="Page 6">
+          </div>
+        </div>
+      </div>
+
+      <!-- View 4: Pages 7-8 -->
+      <div class="view" data-view="4">
+        <div class="spread">
+          <div class="page page-left">
+            <img src="7.jpeg" alt="Page 7">
+          </div>
+          <div class="page page-right">
+            <img src="8.jpeg" alt="Page 8">
+          </div>
+        </div>
+      </div>
+
+      <!-- View 5: Pages 9-10 -->
+      <div class="view" data-view="5">
+        <div class="spread">
+          <div class="page page-left">
+            <img src="9.jpeg" alt="Page 9">
+          </div>
+          <div class="page page-right">
+            <img src="10.jpeg" alt="Page 10">
+          </div>
+        </div>
+      </div>
+
+      <!-- View 6: Pages 11-12 -->
+      <div class="view" data-view="6">
+        <div class="spread">
+          <div class="page page-left">
+            <img src="11.jpeg" alt="Page 11">
+          </div>
+          <div class="page page-right">
+            <img src="12.jpeg" alt="Page 12">
+          </div>
+        </div>
+      </div>
+
+      <!-- View 7: Pages 13-14 -->
+      <div class="view" data-view="7">
+        <div class="spread">
+          <div class="page page-left">
+            <img src="13.jpeg" alt="Page 13">
+          </div>
+          <div class="page page-right">
+            <img src="14.jpeg" alt="Page 14">
+          </div>
+        </div>
+      </div>
+
+      <!-- View 8: Pages 15-16 -->
+      <div class="view" data-view="8">
+        <div class="spread">
+          <div class="page page-left">
+            <img src="15.jpeg" alt="Page 15">
+          </div>
+          <div class="page page-right">
+            <img src="16.jpeg" alt="Page 16">
+          </div>
+        </div>
+      </div>
+
+      <!-- View 9: Pages 17-18 -->
+      <div class="view" data-view="9">
+        <div class="spread">
+          <div class="page page-left">
+            <img src="17.jpeg" alt="Page 17">
+          </div>
+          <div class="page page-right">
+            <img src="18.jpeg" alt="Page 18">
+          </div>
+        </div>
+      </div>
+
+      <!-- View 10: Pages 19-20 -->
+      <div class="view" data-view="10">
+        <div class="spread">
+          <div class="page page-left">
+            <img src="19.jpeg" alt="Page 19">
+          </div>
+          <div class="page page-right">
+            <img src="20.jpeg" alt="Page 20">
+          </div>
+        </div>
+      </div>
+
+      <!-- View 11: Pages 21-22 -->
+      <div class="view" data-view="11">
+        <div class="spread">
+          <div class="page page-left">
+            <img src="21.jpeg" alt="Page 21">
+          </div>
+          <div class="page page-right">
+            <img src="22.jpeg" alt="Page 22">
+          </div>
+        </div>
+      </div>
+
+      <!-- View 12: Pages 23-24 -->
+      <div class="view" data-view="12">
+        <div class="spread">
+          <div class="page page-left">
+            <img src="23.jpeg" alt="Page 23">
+          </div>
+          <div class="page page-right">
+            <img src="24.jpeg" alt="Page 24">
+          </div>
+        </div>
+      </div>
+
+      <!-- View 13: Pages 25-26 -->
+      <div class="view" data-view="13">
+        <div class="spread">
+          <div class="page page-left">
+            <img src="25.jpeg" alt="Page 25">
+          </div>
+          <div class="page page-right">
+            <img src="26.jpeg" alt="Page 26">
+          </div>
+        </div>
+      </div>
+
+      <!-- View 14: Pages 27-28 -->
+      <div class="view" data-view="14">
+        <div class="spread">
+          <div class="page page-left">
+            <img src="27.jpeg" alt="Page 27">
+          </div>
+          <div class="page page-right">
+            <img src="28.jpeg" alt="Page 28">
+          </div>
+        </div>
+      </div>
+
+      <!-- View 15: Pages 29-30 -->
+      <div class="view" data-view="15">
+        <div class="spread">
+          <div class="page page-left">
+            <img src="29.jpeg" alt="Page 29">
+          </div>
+          <div class="page page-right">
+            <img src="30.jpeg" alt="Page 30">
+          </div>
+        </div>
+      </div>
+
+      <!-- View 16: Page 31 + Blank -->
+      <div class="view" data-view="16">
+        <div class="spread">
+          <div class="page page-left">
+            <img src="31.jpeg" alt="Page 31">
+          </div>
+          <div class="page page-right blank"></div>
+        </div>
+      </div>
+
+      <!-- View 17: Back Cover -->
+      <div class="view" data-view="17">
+        <div class="back-cover">
+          <img src="32.jpeg" alt="Back Cover">
         </div>
       </div>
       
